@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>환자 페이지 - 케어노트 (OB/GYN)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: "Inter", sans-serif; background-color: #fff1f2; }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .hidden-section { display: none; }
+        
+        /* 커스텀 UI 스타일 */
+        .category-btn.selected { background-color: #be185d; color: white; border-color: #be185d; }
+        
+        .sidebar-patient-link {
+            display: block; padding: 0.85rem 1rem; border-radius: 0.5rem;
+            color: #d1d5db; font-weight: 500; font-size: 1.125rem; cursor: pointer;
+            margin-bottom: 0.5rem; transition: all 0.2s; border: 2px solid transparent;
+        }
+        .sidebar-patient-link:hover { background-color: #374151; color: #ffffff; }
+        .sidebar-patient-link.selected { background-color: #be185d; color: #ffffff; font-weight: 600; }
+        
+        .question-card {
+            background-color: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.75rem;
+            padding: 1.5rem; margin-bottom: 1rem; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        .question-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; color: #1f2937; }
+        .sub-label { font-size: 0.9rem; color: #6b7280; margin-bottom: 0.5rem; display: block; }
+        
+        .checkbox-group label, .radio-group label {
+            display: flex; align-items: center; padding: 0.75rem;
+            border: 1px solid #e5e7eb; border-radius: 0.5rem; margin-bottom: 0.5rem;
+            cursor: pointer; transition: all 0.2s; font-size: 0.95rem;
+        }
+        .checkbox-group label:hover, .radio-group label:hover { background-color: #fff0f5; border-color: #fbcfe8; }
+        .checkbox-group input, .radio-group input { margin-right: 0.75rem; accent-color: #db2777; width: 1.1rem; height: 1.1rem; }
+    </style>
+</head>
+<body class="bg-rose-50 h-screen">
+
+    <div class="h-full flex">
+        <!-- 사이드바 -->
+        <aside class="w-72 bg-gray-900 text-white h-full p-6 flex flex-col">
+            <h2 class="text-2xl font-bold mb-8 flex items-center gap-2 text-rose-400">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                산부인과 문진
+            </h2>
+            <nav id="patientListSidebar" class="flex-1 overflow-y-auto">
+                <p id="patientLoadingMessage" class="text-gray-400 text-sm p-2">로딩 중...</p>
+            </nav>
+            <a href="index.html" class="w-full bg-gray-700 text-white py-3 px-4 rounded-lg font-semibold hover:bg-gray-600 transition mt-auto text-center">처음으로</a>
+        </aside>
+        
+        <!-- 메인 영역 -->
+        <main class="flex-1 p-10 bg-rose-50 overflow-y-auto">
+
+            <!-- 1. 환영 -->
+            <div id="welcomePage" class="page-section active max-w-3xl mx-auto text-center mt-20">
+                <h1 class="text-5xl font-bold mb-6 text-gray-800">환영합니다</h1>
+                <div class="bg-white p-12 rounded-lg shadow-xl border border-gray-200">
+                    <p class="text-2xl text-gray-700">왼쪽 목록에서 <span class="text-rose-600 font-bold">본인 이름</span>을 선택해주세요.</p>
+                </div>
+            </div>
+
+            <!-- 2. 본인 확인 -->
+            <div id="patientVerifyPage" class="page-section max-w-2xl mx-auto">
+                <button id="verifyBackButton" class="text-rose-600 font-bold mb-4 text-lg">&larr; 뒤로가기</button>
+                <div class="bg-white p-10 rounded-lg shadow-xl border border-gray-200">
+                    <h1 class="text-3xl font-bold mb-6 text-gray-800">본인 확인</h1>
+                    <p class="mb-4 text-lg"><strong id="verifyPatientName" class="text-2xl text-rose-600"></strong> 님, 생년월일 6자리를 입력해주세요.</p>
+                    <form id="verifyForm">
+                        <input type="tel" id="birthdateVerifyInput" class="w-full text-center text-3xl p-4 border-2 border-gray-300 rounded-lg focus:border-rose-500 focus:ring-rose-500 mb-6" maxlength="6" required placeholder="예: 990101">
+                        <button type="submit" class="w-full bg-rose-600 text-white py-4 px-6 rounded-lg text-xl font-bold hover:bg-rose-700 transition">확인</button>
+                    </form>
+                    <p id="verifyError" class="mt-4 text-center text-red-600 font-bold"></p>
+                </div>
+            </div>
+
+            <!-- 3. 상세 문진표 -->
+            <div id="questionnairePage" class="page-section max-w-5xl mx-auto">
+                <div class="flex items-end gap-3 mb-6">
+                    <h1 class="text-3xl font-bold text-gray-800"><span id="patientNameDisplay" class="text-rose-600"></span> 님의 문진표</h1>
+                    <span class="text-gray-500 pb-1">정확한 진료를 위해 자세히 적어주세요.</span>
+                </div>
+                
+                <form id="questionnaireForm">
+                    
+                    <!-- STEP 1: 진료 항목 선택 -->
+                    <div class="question-card border-l-4 border-rose-500">
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">Q. 오늘 진료를 보시는 가장 주된 목적은 무엇인가요?</h2>
+                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                            <button type="button" class="category-btn p-4 border rounded-xl hover:bg-rose-50 font-bold text-gray-600 shadow-sm transition" onclick="selectCategory('pregnancy')">🤰 임신 확인/관리</button>
+                            <button type="button" class="category-btn p-4 border rounded-xl hover:bg-rose-50 font-bold text-gray-600 shadow-sm transition" onclick="selectCategory('preparation')">🌱 임신 준비/난임</button>
+                            <button type="button" class="category-btn p-4 border rounded-xl hover:bg-rose-50 font-bold text-gray-600 shadow-sm transition" onclick="selectCategory('period')">🩸 생리 관련</button>
+                            <button type="button" class="category-btn p-4 border rounded-xl hover:bg-rose-50 font-bold text-gray-600 shadow-sm transition" onclick="selectCategory('problem')">🩺 질염/통증/검진</button>
+                            <button type="button" class="category-btn p-4 border rounded-xl hover:bg-rose-50 font-bold text-gray-600 shadow-sm transition" onclick="selectCategory('contraception')">💊 피임 상담</button>
+                        </div>
+                        <input type="hidden" name="category" id="selectedCategoryInput" required>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- [A] 임신 관련 상세 질문 -->
+                    <!-- ========================================== -->
+                    <div id="section-pregnancy" class="hidden-section space-y-4">
+                        <div class="bg-rose-50 p-4 rounded-lg border border-rose-100 mb-4">
+                            <h3 class="text-lg font-bold text-rose-800">🤰 임신 관련 상세 문진</h3>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">1. 임신 테스트기를 사용해 보셨나요?</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="preg_test_result" value="양성(두 줄)"> 네, 두 줄(양성) 확인했습니다.</label>
+                                <label><input type="radio" name="preg_test_result" value="음성(한 줄)"> 네, 한 줄(음성)이었습니다.</label>
+                                <label><input type="radio" name="preg_test_result" value="미사용"> 아니오, 아직 안 해봤습니다.</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">2. (알고 계신다면) 현재 임신 주수는?</label>
+                            <input type="text" name="preg_weeks" class="w-full p-3 border rounded-md" placeholder="예: 8주 3일, 혹은 모름">
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">3. 현재 겪고 있는 증상을 모두 선택해주세요.</label>
+                            <div class="checkbox-group grid grid-cols-2 gap-2">
+                                <label><input type="checkbox" name="preg_symptoms" value="입덧"> 입덧/구역질/소화불량</label>
+                                <label><input type="checkbox" name="preg_symptoms" value="출혈"> 질 출혈 (붉은색/갈색)</label>
+                                <label><input type="checkbox" name="preg_symptoms" value="복통"> 배가 뭉치거나 아픔</label>
+                                <label><input type="checkbox" name="preg_symptoms" value="두통"> 심한 두통/어지러움</label>
+                                <label><input type="checkbox" name="preg_symptoms" value="분비물"> 질 분비물 증가/물 같은 냉</label>
+                                <label><input type="checkbox" name="preg_symptoms" value="태동감소"> 태동이 평소보다 줄었음</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">4. (경산부의 경우) 과거 임신/출산 시 특이사항이 있었나요?</label>
+                            <textarea name="preg_history_detail" rows="2" class="w-full p-3 border rounded-md" placeholder="예: 임신성 당뇨, 고혈압, 조산, 제왕절개 등"></textarea>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">5. 현재 복용 중인 영양제나 약물이 있나요?</label>
+                            <input type="text" name="preg_meds" class="w-full p-3 border rounded-md" placeholder="예: 엽산, 철분제, 갑상선약 등">
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- [B] 임신 준비/난임 상세 질문 -->
+                    <!-- ========================================== -->
+                    <div id="section-preparation" class="hidden-section space-y-4">
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-100 mb-4">
+                            <h3 class="text-lg font-bold text-green-800">🌱 임신 준비/난임 상세 문진</h3>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">1. 피임을 하지 않고 임신을 시도한 기간은?</label>
+                            <div class="radio-group grid grid-cols-2 gap-2">
+                                <label><input type="radio" name="prep_duration" value="6개월 미만"> 6개월 미만</label>
+                                <label><input type="radio" name="prep_duration" value="6개월~1년"> 6개월 ~ 1년</label>
+                                <label><input type="radio" name="prep_duration" value="1년 이상"> 1년 이상</label>
+                                <label><input type="radio" name="prep_duration" value="2년 이상"> 2년 이상 (난임 검사 희망)</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">2. 생리 주기는 규칙적인가요?</label>
+                            <input type="text" name="prep_cycle_detail" class="w-full p-3 border rounded-md" placeholder="예: 28~30일로 규칙적, 혹은 30~50일로 매우 불규칙">
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">3. 배란일을 어떻게 확인하고 계신가요?</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="prep_method" value="어플"> 생리 어플리케이션 예측</label>
+                                <label><input type="checkbox" name="prep_method" value="배란테스트기"> 배란 테스트기 사용</label>
+                                <label><input type="checkbox" name="prep_method" value="기초체온"> 기초체온 측정</label>
+                                <label><input type="checkbox" name="prep_method" value="병원초음파"> 산부인과 배란 초음파</label>
+                                <label><input type="checkbox" name="prep_method" value="안함"> 특별히 확인하지 않음</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">4. 과거에 산부인과 질환을 진단받은 적이 있나요?</label>
+                            <div class="checkbox-group grid grid-cols-2 gap-2">
+                                <label><input type="checkbox" name="prep_history" value="다낭성"> 다낭성 난소 증후군(PCOS)</label>
+                                <label><input type="checkbox" name="prep_history" value="자궁근종"> 자궁근종 / 용종</label>
+                                <label><input type="checkbox" name="prep_history" value="자궁내막증"> 자궁내막증</label>
+                                <label><input type="checkbox" name="prep_history" value="나팔관"> 나팔관 막힘/수술</label>
+                                <label><input type="checkbox" name="prep_history" value="없음"> 없음</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">5. 배우자(남편)분도 정액 검사 등 검진을 받으셨나요?</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="prep_partner" value="받음"> 네, 받았습니다. (이상 없음/있음)</label>
+                                <label><input type="radio" name="prep_partner" value="안받음"> 아니오, 아직 안 받았습니다.</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- [C] 생리 관련 상세 질문 -->
+                    <!-- ========================================== -->
+                    <div id="section-period" class="hidden-section space-y-4">
+                        <div class="bg-red-50 p-4 rounded-lg border border-red-100 mb-4">
+                            <h3 class="text-lg font-bold text-red-800">🩸 생리 관련 상세 문진</h3>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">1. 가장 큰 불편함은 무엇인가요? (중복 선택)</label>
+                            <div class="checkbox-group grid grid-cols-2 gap-2">
+                                <label><input type="checkbox" name="period_symptom" value="생리통"> 극심한 생리통</label>
+                                <label><input type="checkbox" name="period_symptom" value="과다월경"> 생리 양이 너무 많음</label>
+                                <label><input type="checkbox" name="period_symptom" value="희소월경"> 생리 양이 너무 적음</label>
+                                <label><input type="checkbox" name="period_symptom" value="무월경"> 생리를 안 함 (3개월 이상)</label>
+                                <label><input type="checkbox" name="period_symptom" value="부정출혈"> 생리 기간이 아닌데 피가 남</label>
+                                <label><input type="checkbox" name="period_symptom" value="PMS"> 심한 월경전 증후군(감정, 붓기)</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">2. (생리통 선택 시) 통증 점수를 0~10점으로 표현한다면?</label>
+                            <span class="sub-label">0:통증 없음 / 5:진통제 필수 / 10:응급실 갈 정도</span>
+                            <input type="range" name="period_pain_score" min="0" max="10" step="1" value="0" class="w-full mb-2 accent-rose-500" oninput="document.getElementById('painScoreVal').innerText = this.value">
+                            <p class="text-center font-bold text-rose-600"><span id="painScoreVal">0</span> 점</p>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">3. 생리 양은 어느 정도인가요? (패드 사용량)</label>
+                            <select name="period_amount" class="w-full p-3 border rounded-md">
+                                <option value="보통">보통 (하루 3~5개 교체)</option>
+                                <option value="많음">많음 (1~2시간마다 흠뻑 젖음 / 굴 낳는 느낌)</option>
+                                <option value="적음">적음 (라이너로 충분함)</option>
+                            </select>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">4. 최근 급격한 체중 변화나 스트레스가 있었나요?</label>
+                            <textarea name="period_change" rows="2" class="w-full p-3 border rounded-md" placeholder="예: 다이어트로 5kg 감량, 시험 기간 스트레스 등"></textarea>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">5. 어머니나 자매 분들 중 자궁 관련 질환이 있나요?</label>
+                            <input type="text" name="period_family" class="w-full p-3 border rounded-md" placeholder="예: 어머니 자궁근종 수술">
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- [D] 질염/통증/검진 상세 질문 -->
+                    <!-- ========================================== -->
+                    <div id="section-problem" class="hidden-section space-y-4">
+                        <div class="bg-purple-50 p-4 rounded-lg border border-purple-100 mb-4">
+                            <h3 class="text-lg font-bold text-purple-800">🩺 질염/통증/검진 상세 문진</h3>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">1. 분비물(냉)의 상태를 자세히 알려주세요.</label>
+                            <div class="checkbox-group grid grid-cols-2 gap-2">
+                                <label><input type="checkbox" name="prob_discharge_color" value="흰색치즈"> 흰색 으깨진 두부/치즈 같음</label>
+                                <label><input type="checkbox" name="prob_discharge_color" value="노란색/연두색"> 짙은 노란색 또는 연두색</label>
+                                <label><input type="checkbox" name="prob_discharge_color" value="회색/물"> 회색빛 또는 물처럼 흐름</label>
+                                <label><input type="checkbox" name="prob_discharge_color" value="피섞임"> 피가 섞인 갈색 냉</label>
+                                <label><input type="checkbox" name="prob_discharge_color" value="냄새"> 생선 비린내 등 악취</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">2. 불편한 감각이나 통증이 있나요?</label>
+                            <div class="checkbox-group grid grid-cols-2 gap-2">
+                                <label><input type="checkbox" name="prob_sensation" value="가려움"> 외음부가 심하게 가려움</label>
+                                <label><input type="checkbox" name="prob_sensation" value="따가움"> 소변 볼 때 따가움/작열감</label>
+                                <label><input type="checkbox" name="prob_sensation" value="성교통"> 관계 시 통증</label>
+                                <label><input type="checkbox" name="prob_sensation" value="하복부통증"> 아랫배가 콕콕 쑤시거나 묵직함</label>
+                                <label><input type="checkbox" name="prob_sensation" value="혹/종기"> 외음부에 혹이나 종기가 만져짐</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">3. 증상이 시작된 지 얼마나 되었나요?</label>
+                            <input type="text" name="prob_duration" class="w-full p-3 border rounded-md" placeholder="예: 3일 전부터, 일주일 넘음">
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">4. 질염이나 방광염 재발이 잦은 편인가요?</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="prob_recurrence" value="자주"> 네, 피곤하면 자주 재발합니다.</label>
+                                <label><input type="radio" name="prob_recurrence" value="가끔"> 일 년에 한두 번 정도입니다.</label>
+                                <label><input type="radio" name="prob_recurrence" value="처음"> 아니오, 처음입니다.</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">5. 최근 성관계 파트너의 변화가 있었나요?</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="prob_partner" value="있음"> 네 (성병 검사 희망)</label>
+                                <label><input type="radio" name="prob_partner" value="없음"> 아니오</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- [E] 피임 상담 상세 질문 -->
+                    <!-- ========================================== -->
+                    <div id="section-contraception" class="hidden-section space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+                            <h3 class="text-lg font-bold text-blue-800">💊 피임 상담 상세 문진</h3>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">1. 현재 사용 중인 피임 방법은 무엇인가요?</label>
+                            <input type="text" name="contra_current" class="w-full p-3 border rounded-md" placeholder="예: 경구피임약, 콘돔, 미레나 시술 중, 없음">
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">2. 원하시는 피임 방법이나 상담 내용은?</label>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="contra_wish" value="피임약"> 경구피임약 처방/상담</label>
+                                <label><input type="checkbox" name="contra_wish" value="사후피임약"> 사후피임약(응급) 처방 필요</label>
+                                <label><input type="checkbox" name="contra_wish" value="자궁내장치"> 루프/미레나 등 시술 상담</label>
+                                <label><input type="checkbox" name="contra_wish" value="임플라논"> 임플라논(팔 이식) 상담</label>
+                                <label><input type="checkbox" name="contra_wish" value="부작용"> 기존 피임법 부작용 상담</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">3. 흡연을 하시나요? (피임약 처방 시 중요)</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="contra_smoking" value="흡연"> 네, 피웁니다.</label>
+                                <label><input type="radio" name="contra_smoking" value="비흡연"> 아니오.</label>
+                            </div>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">4. 혈전증, 심혈관 질환, 유방암 등의 가족력이나 병력이 있나요?</label>
+                            <textarea name="contra_risk" rows="2" class="w-full p-3 border rounded-md" placeholder="예: 어머니 유방암, 본인 편두통 심함 등"></textarea>
+                        </div>
+                        <div class="question-card">
+                            <label class="question-title">5. 향후 임신 계획은 언제쯤 있으신가요?</label>
+                            <input type="text" name="contra_plan" class="w-full p-3 border rounded-md" placeholder="예: 1년 뒤, 당분간 없음, 자녀 계획 끝남">
+                        </div>
+                    </div>
+
+                    <!-- ========================================== -->
+                    <!-- [공통] 필수 질문 -->
+                    <!-- ========================================== -->
+                    <div id="common-section" class="mt-8 pt-8 border-t-4 border-gray-100 hidden-section space-y-4">
+                        <h3 class="text-xl font-bold mb-4 text-gray-700">📝 기본 필수 정보</h3>
+                        
+                        <div class="question-card border-l-4 border-rose-400">
+                            <label class="question-title text-rose-700">마지막 생리 시작일(LMP)은 언제인가요? <span class="text-sm font-normal text-gray-500">(필수)</span></label>
+                            <input type="date" name="common_lmp" class="w-full p-3 border border-gray-300 rounded-md">
+                        </div>
+
+                        <div class="question-card">
+                            <label class="question-title">과거 임신/출산력 (G-P-A)</label>
+                            <span class="sub-label">예: 자연분만 1회, 유산 1회 (없으면 '없음')</span>
+                            <input type="text" name="common_gpa" class="w-full p-3 border rounded-md" placeholder="예: 1-0-1 (총1번임신, 0번출산, 1번유산)">
+                        </div>
+
+                        <div class="question-card">
+                            <label class="question-title">현재 앓고 있는 질환이나 알레르기가 있나요?</label>
+                            <textarea name="common_history" rows="2" class="w-full p-3 border rounded-md" placeholder="예: 갑상선 질환, 아스피린 알레르기"></textarea>
+                        </div>
+
+                        <div class="question-card">
+                            <label class="question-title">의사 선생님께 꼭 하고 싶은 말씀이 있다면 적어주세요.</label>
+                            <textarea name="common_goals" rows="3" class="w-full p-3 border rounded-md"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="w-full bg-rose-600 text-white py-5 px-6 rounded-xl text-xl font-bold hover:bg-rose-700 transition mt-6 shadow-lg transform hover:scale-[1.02] duration-200">
+                            문진표 제출하기
+                        </button>
+                    </div>
+
+                    <p id="questionnaireError" class="mt-4 text-center text-red-600 font-bold"></p>
+                </form>
+            </div>
+
+            <!-- 4. 완료 화면 -->
+            <div id="completionPage" class="page-section max-w-2xl mx-auto mt-20">
+                <div class="bg-white p-12 rounded-lg shadow-xl text-center border border-gray-200">
+                    <div class="text-rose-500 mb-6 flex justify-center">
+                        <svg class="w-24 h-24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h1 class="text-4xl font-bold mb-4 text-gray-800">접수 완료</h1>
+                    <p class="text-xl text-gray-600 mb-2">상세한 문진 감사합니다.</p>
+                    <p class="text-gray-500">진료실 앞에서 잠시만 대기해주세요.</p>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Firebase SDK Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, where, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAcxnduVJ5MpaUOzGmG1DmbUJKuUr5Uhzo",
+            authDomain: "doctor-cba8a.firebaseapp.com",
+            projectId: "doctor-cba8a",
+            storageBucket: "doctor-cba8a.firebasestorage.app",
+            messagingSenderId: "899440797117",
+            appId: "1:899440797117:web:78a9f0f9b6a91b2d5b5ed4"
+        };
+        const appId = 'default-symptom-tracker';
+
+        let app, db, selectedPatient = null;
+
+        // 전역 함수로 카테고리 선택 로직 노출
+        window.selectCategory = function(category) {
+            // 모든 섹션 숨기기
+            document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+
+            // 선택된 섹션 보이기
+            document.getElementById('section-' + category).style.display = 'block';
+            document.getElementById('common-section').style.display = 'block';
+            
+            // 버튼 스타일 활성화
+            event.target.classList.add('selected');
+            
+            // input 값 저장
+            document.getElementById('selectedCategoryInput').value = category;
+            
+            // 스크롤 부드럽게 이동
+            document.getElementById('section-' + category).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        try {
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            
+            const showPage = (id) => {
+                document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+                document.getElementById(id).classList.add('active');
+                if(id === 'welcomePage') {
+                   document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('selected'));
+                   document.querySelectorAll('.hidden-section').forEach(el => el.style.display = 'none');
+                   if(document.getElementById('questionnaireForm')) document.getElementById('questionnaireForm').reset();
+                }
+            };
+
+            const waitingListRef = collection(db, "artifacts", appId, "public", "data", "waiting_list");
+            const q = query(waitingListRef, where("status", "in", ["waiting", "writing"]));
+            
+            onSnapshot(q, (snapshot) => {
+                const listEl = document.getElementById('patientListSidebar');
+                listEl.innerHTML = "";
+                if (snapshot.empty) listEl.innerHTML = '<p class="text-gray-400 p-2">대기 환자가 없습니다.</p>';
+                
+                snapshot.forEach(doc => {
+                    const p = doc.data();
+                    const link = document.createElement('div');
+                    link.className = 'sidebar-patient-link';
+                    link.textContent = p.name;
+                    link.onclick = () => {
+                        selectedPatient = { id: doc.id, ...p };
+                        document.querySelectorAll('.sidebar-patient-link').forEach(l => l.classList.remove('selected'));
+                        link.classList.add('selected');
+                        document.getElementById('verifyPatientName').textContent = p.name;
+                        document.getElementById('birthdateVerifyInput').value = "";
+                        showPage('patientVerifyPage');
+                    };
+                    listEl.appendChild(link);
+                });
+            });
+
+            document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const inputBirth = document.getElementById('birthdateVerifyInput').value;
+                if (inputBirth === selectedPatient.birthdate) {
+                    document.getElementById('patientNameDisplay').textContent = selectedPatient.name;
+                    await updateDoc(doc(db, "artifacts", appId, "public", "data", "waiting_list", selectedPatient.id), { status: "writing" });
+                    showPage('questionnairePage');
+                } else {
+                    document.getElementById('verifyError').textContent = "생년월일이 일치하지 않습니다.";
+                }
+            });
+            document.getElementById('verifyBackButton').onclick = () => showPage('welcomePage');
+
+            // 폼 제출 로직 (확장된 데이터 수집)
+            document.getElementById('questionnaireForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const category = formData.get('category');
+                
+                if(!category) {
+                    alert("진료 항목을 먼저 선택해주세요.");
+                    return;
+                }
+
+                // 체크박스 수집 헬퍼 함수
+                const collectChecks = (name) => {
+                    const arr = [];
+                    document.querySelectorAll(`input[name="${name}"]:checked`).forEach(cb => arr.push(cb.value));
+                    return arr;
+                };
+
+                // 모든 가능한 필드를 수집 (undefined는 저장되지 않음)
+                const data = {
+                    category: category,
+                    submittedAt: new Date(),
+                    
+                    // 공통
+                    common_lmp: formData.get('common_lmp'),
+                    common_gpa: formData.get('common_gpa'),
+                    common_history: formData.get('common_history'),
+                    common_goals: formData.get('common_goals'),
+
+                    // 임신
+                    preg_test_result: formData.get('preg_test_result'),
+                    preg_weeks: formData.get('preg_weeks'),
+                    preg_symptoms: collectChecks('preg_symptoms'),
+                    preg_history_detail: formData.get('preg_history_detail'),
+                    preg_meds: formData.get('preg_meds'),
+
+                    // 준비
+                    prep_duration: formData.get('prep_duration'),
+                    prep_cycle_detail: formData.get('prep_cycle_detail'),
+                    prep_method: collectChecks('prep_method'),
+                    prep_history: collectChecks('prep_history'),
+                    prep_partner: formData.get('prep_partner'),
+
+                    // 생리
+                    period_symptom: collectChecks('period_symptom'),
+                    period_pain_score: formData.get('period_pain_score'),
+                    period_amount: formData.get('period_amount'),
+                    period_change: formData.get('period_change'),
+                    period_family: formData.get('period_family'),
+
+                    // 문제(질염/통증)
+                    prob_discharge_color: collectChecks('prob_discharge_color'),
+                    prob_sensation: collectChecks('prob_sensation'),
+                    prob_duration: formData.get('prob_duration'),
+                    prob_recurrence: formData.get('prob_recurrence'),
+                    prob_partner: formData.get('prob_partner'),
+
+                    // 피임
+                    contra_current: formData.get('contra_current'),
+                    contra_wish: collectChecks('contra_wish'),
+                    contra_smoking: formData.get('contra_smoking'),
+                    contra_risk: formData.get('contra_risk'),
+                    contra_plan: formData.get('contra_plan'),
+                };
+
+                console.log("Submitting Detailed Data:", data);
+
+                try {
+                    await updateDoc(doc(db, "artifacts", appId, "public", "data", "waiting_list", selectedPatient.id), {
+                        status: "completed",
+                        questionnaireData: data
+                    });
+                    showPage('completionPage');
+                } catch (err) {
+                    console.error(err);
+                    document.getElementById('questionnaireError').textContent = "제출 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+                }
+            });
+
+            showPage('welcomePage');
+
+        } catch (e) {
+            console.error(e);
+            alert("시스템 초기화 오류");
+        }
+    </script>
+</body>
+</html>

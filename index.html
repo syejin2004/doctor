@@ -3,218 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>프로젝트: AI 환자 문진 시스템 (서예진 포트폴리오)</title>
+    <title>케어노트 (OB/GYN)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts: Inter (English) + Noto Sans KR (Korean) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Inter', 'Noto Sans KR', sans-serif;
-        }
-        /* 섹션 제목 스타일 */
-        .section-title {
-            @apply text-3xl font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-500 inline-block;
-        }
+        body { font-family: "Inter", sans-serif; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body class="bg-rose-50 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-lg p-8">
+        <header class="text-center mb-12">
+            <!-- 산부인과 심볼 아이콘 -->
+            <svg class="w-20 h-20 mx-auto text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+            </svg>
 
-    <!-- 헤더 -->
-    <header class="bg-white shadow-md sticky top-0 z-10">
-        <nav class="container mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center">
-            <div class="text-2xl font-bold text-blue-600">
-                🩺 <a href="index.html">Smart Chart: AI 문진 시스템</a>
-            </div>
-            <div class="mt-2 md:mt-0 text-gray-600">
-                <span class="font-semibold">서예진</span> | 프론트엔드 개발자 포트폴리오
-            </div>
-        </nav>
-    </header>
+            <h1 class="text-4xl font-bold text-gray-800 mt-4">케어노트 <span class="text-rose-500">산부인과</span></h1>
+            <p class="text-lg text-gray-600 mt-2">여성의 건강을 세심하게 기록합니다.</p>
+        </header>
 
-    <!-- 메인 컨텐츠 -->
-    <main class="container mx-auto px-6 py-12">
+        <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- 의사/데스크용 버튼 -->
+            <a href="doctor.html" class="group flex flex-col items-center p-8 bg-white rounded-lg shadow-lg border-2 border-transparent hover:border-rose-500 hover:shadow-xl transition-all duration-300">
+                <svg class="w-16 h-16 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-900 mt-5">의료진</h2>
+                <p class="text-sm text-gray-500 mt-1 group-hover:text-rose-600 transition">대기 환자 및 리포트 관리</p>
+            </a>
 
-        <!-- 1. 히어로 및 소개 -->
-        <section id="hero" class="text-center py-16">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">AI 환자 문진 시스템: Smart Chart</h1>
-            <p class="text-xl text-blue-600 font-semibold mb-8">"더 나은 사용자 경험을 만드는 프론트엔드 개발자"</p>
-            <div class="flex justify-center space-x-6">
-                <a href="mailto:syejin2004@naver.com" class="bg-blue-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-blue-700 transition duration-300">이메일: syejin2004@naver.com</a>
-                <a href="https://github.com/syejin2004" target="_blank" rel="noopener noreferrer" class="bg-gray-800 text-white px-6 py-2 rounded-full font-semibold hover:bg-gray-900 transition duration-300">GitHub: syejin2004</a>
-            </div>
-        </section>
-
-        <!-- 2. About Me -->
-        <section id="about-me" class="bg-white p-8 rounded-lg shadow-lg mb-12">
-            <h2 class="section-title">About Me</h2>
-            <div class="text-gray-700 space-y-4 leading-relaxed">
-                <p>저는 사람들이 불편해하는 문제를 기술로 해결하는 과정에서 매력을 느끼는 개발자입니다.</p>
-                <p>이 프로젝트를 통해 환자들이 자신의 증상을 더욱 잘 전달하고 짧은 진료 시간 안에 떨지 않고 증상을 말할 수 있게 되는 것이 제가 원하는 목표 입니다.</p>
-            </div>
-        </section>
-
-        <!-- 3. 프로젝트 개요 (문제 정의, 목표) -->
-        <section id="overview" class="mb-12">
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- 문제 정의 -->
-                <div class="bg-white p-8 rounded-lg shadow-lg">
-                    <h3 class="text-2xl font-bold text-red-600 mb-4">1. 문제 정의 (The Problem)</h3>
-                    <p class="text-gray-700 leading-relaxed">
-                        기존 진료 시스템은 의사에게 반복적인 질문 부담과 번아웃(Burnout)을, 환자에게는 짧은 진료 시간 내에 증상을 설명해야 하는 심리적 압박감을 유발했습니다. 특히 정신과나 산부인과처럼 환자의 '서사(narrative)'가 중요한 진료과에서는, 환자가 긴장하여 핵심 증상을 잊거나 의사와의 정서적 교감이 단절되는 문제가 발생합니다.
-                    </p>
-                </div>
-                <!-- 프로젝트 목표 -->
-                <div class="bg-white p-8 rounded-lg shadow-lg">
-                    <h3 class="text-2xl font-bold text-green-600 mb-4">2. 프로젝트 목표 (The Goal)</h3>
-                    <p class="text-gray-700 leading-relaxed">
-                        이 프로젝트의 목표는 AI를 활용해 환자의 복잡한 이야기를 '스마트 리포트'로 요약하여, 의사가 진료 시간을 '질문'이 아닌 '진단과 공감'에 집중할 수 있도록 돕는 것입니다.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 4. 기술 스택 -->
-        <section id="skills" class="bg-white p-8 rounded-lg shadow-lg mb-12">
-            <h2 class="section-title">기술 스택 (Tech Stack)</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full min-w-lg">
-                    <thead>
-                        <tr class="bg-gray-200 text-left">
-                            <th class="p-4 rounded-tl-lg">구분</th>
-                            <th class="p-4">기술</th>
-                            <th class="p-4 rounded-tr-lg">사용처</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr class="border-b">
-                            <td class="p-4 font-semibold text-blue-700">프론트엔드</td>
-                            <td class="p-4">JavaScript, React, HTML, CSS</td>
-                            <td class="p-4">환자 및 의료진용 UI/UX 구현 (React는 본 프로젝트의 기반 기술)</td>
-                        </tr>
-                        <tr class="border-b">
-                            <td class="p-4 font-semibold text-green-700">백엔드 (BaaS)</td>
-                            <td class="p-4">Firebase (Firestore, Authentication)</td>
-                            <td class="p-4">실시간 대기 명단 DB, 의료진 인증</td>
-                        </tr>
-                        <tr class="border-b">
-                            <td class="p-4 font-semibold text-purple-700">AI</td>
-                            <td class="p-4">Google Gemini API</td>
-                            <td class="p-4">환자 문진표 요약 및 '스마트 리포트' 생성</td>
-                        </tr>
-                        <tr>
-                            <td class="p-4 font-semibold text-gray-700">Tools & DevOps</td>
-                            <td class="p-4">Git, VScode, Google Cloud Console</td>
-                            <td class="p-4">버전 관리, 개발 환경, API 키 관리</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
-        <!-- 5. 아키텍처 -->
-        <section id="architecture" class="bg-white p-8 rounded-lg shadow-lg mb-12">
-            <h2 class="section-title">아키텍처 (Architecture)</h2>
-            <p class="mb-6 text-gray-700">백엔드 서버를 직접 구축하는 대신, <strong class="text-blue-600">Firebase를 BaaS(Backend as a Service)</strong>로 채택한 서버리스 아키텍처를 설계했습니다.</p>
-            
-            <!-- 아키텍처 다이어그램 Placeholder -->
-            <div class="bg-gray-100 border border-gray-300 rounded-lg p-8 text-center mb-6">
-                <h4 class="text-xl font-semibold mb-4">시스템 아키텍처 다이어그램</h4>
-                <div class="text-gray-600"></div>
-                <p class="mt-4 text-sm text-gray-500">(의료진/환자 Client - Firebase (Auth/Firestore) - Gemini API 간의 데이터 흐름도)</p>
-            </div>
-
-            <ul class="space-y-4">
-                <li><strong class="text-gray-900">데이터베이스 (Firestore):</strong> 실시간 동기화가 필수적인 '대기자 명단' 관리를 위해 Cloud Firestore를 사용했습니다. (`/public/data/waiting_list`)</li>
-                <li><strong class="text-gray-900">인증 (Authentication):</strong> 의사/데스크 직원의 보안 로그인을 위해 Firebase Authentication (이메일/비밀번호 방식)을 사용했습니다.</li>
-                <li><strong class="text-gray-900">AI 연동 (Gemini API):</strong> 환자 문진표 요약을 위해, Google의 Gemini API를 클라이언트(`doctor.html`)에서 직접 `fetch` API로 호출했습니다.</li>
-                <li><strong class="text-gray-900">프론트엔드 (HTML/Tailwind):</strong> `index.html`, `doctor.html`, `patient.html` 3개의 정적 파일로 분리하고 Tailwind CSS로 UI를 구현했습니다.</li>
-            </ul>
-        </section>
-
-        <!-- 6. 핵심 기능 -->
-        <section id="features" class="mb-12">
-            <h2 class="section-title mb-8">핵심 기능 (Core Features)</h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- 기능 1 -->
-                <div class="bg-white p-8 rounded-lg shadow-lg">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4">1. 실시간 환자 대기 명단 관리</h3>
-                    <p class="text-gray-700 leading-relaxed">
-                        `doctor.html`에서 데스크 직원이 환자를 등록(`addDoc`)하면, 이 정보가 Firestore의 `waiting_list` 컬렉션에 저장됩니다. `patient.html`은 이 컬렉션을 `onSnapshot`으로 실시간 구독(listening)하여, 새 환자가 등록되는 즉시 사이드바에 이름을 띄웁니다. 환자가 문진을 시작(`status: "writing"`)하거나 완료(`status: "completed"`)할 때마다 `updateDoc`으로 상태를 변경하며, 이 상태는 `doctor.html` 대시보드에도 실시간으로 반영됩니다.
-                    </p>
-                </div>
-                <!-- 기능 2 -->
-                <div class="bg-white p-8 rounded-lg shadow-lg">
-                    <h3 class="text-2xl font-bold text-gray-800 mb-4">2. Gemini API 연동 'AI 스마트 리포트'</h3>
-                    <p class="text-gray-700 leading-relaxed">
-                        `doctor.html`에서 '작성 완료'된 환자를 클릭하면, Firestore에서 해당 환자의 `questionnaireData`를 조회합니다. 이 데이터를 기반으로 '의사 보조' 역할을 하는 **시스템 프롬프트(System Prompt)**를 설계하고, Gemini API에 `fetch`로 요약 요청을 전송합니다. 반환된 AI 요약 텍스트(JSON)를 파싱하여 리포트 모달 최상단에 렌더링, 의사가 환자 진료 전 10초 이내에 핵심을 파악할 수 있도록 했습니다.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- 7. 나의 역할 -->
-        <section id="role" class="bg-white p-8 rounded-lg shadow-lg mb-12">
-            <h2 class="section-title">나의 역할 및 기여 (My Role)</h2>
-            <ul class="list-disc list-inside space-y-3 text-gray-700 leading-relaxed">
-                <li>프로젝트 기획 및 Firebase(BaaS) 기반 서버리스 아키텍처 설계</li>
-                <li>`doctor.html`, `patient.html` 3개 페이지의 UI/UX 흐름 설계 및 Tailwind CSS 구현</li>
-                <li>Firebase Authentication(의사 인증) 및 Firestore(실시간 대기 명단) 스키마 설계 및 연동</li>
-                <li>`onSnapshot`을 이용한 의사-환자 페이지 간 실시간 데이터 동기화 로직 구현</li>
-                <li>정신과용 '하이브리드 질문지' 7단계 문항 설계</li>
-                <li>Gemini API 연동 및 AI 요약본을 위한 시스템 프롬프트 엔지니어링</li>
-            </ul>
-        </section>
-
-        <!-- 8. 회고 (결과, 배운점, 개선점) -->
-        <section id="retrospective" class="mb-12">
-            <h2 class="section-title mb-8">회고 (Retrospective)</h2>
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- 결과 및 성과 -->
-                <div class="bg-green-50 p-6 rounded-lg shadow-md border-l-4 border-green-500">
-                    <h3 class="text-xl font-bold text-green-800 mb-3">결과 및 성과 (Results)</h3>
-                    <ul class="list-disc list-inside space-y-2 text-green-700">
-                        <li>서버 없이 Firebase만으로 실시간 풀스택 앱 프로토타입 완성</li>
-                        <li>환자의 주관식 답변을 AI가 '스마트 리포트'로 요약하는 핵심 기능 구현</li>
-                        <li>의사의 정보 파악 시간 단축 및 환자의 자기표현 시간 확보 목표 달성</li>
-                    </ul>
-                </div>
-                <!-- 배운 점 -->
-                <div class="bg-blue-50 p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-                    <h3 class="text-xl font-bold text-blue-800 mb-3">배운 점 (Learnings)</h3>
-                    <ul class="list-disc list-inside space-y-2 text-blue-700">
-                        <li>`onSnapshot` 리스너의 강력함과 BaaS의 백엔드 개발 공수 단축 효과 체감</li>
-                        <li>비정형 데이터를 AI가 이해하도록 '프롬프트 엔지니어링'을 적용하는 과정 경험</li>
-                        <li>API 키 호출 관련 CORS 및 403 오류 디버깅 (GCP 콘솔 활성화)</li>
-                    </ul>
-                </div>
-                <!-- 개선점 -->
-                <div class="bg-yellow-50 p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
-                    <h3 class="text-xl font-bold text-yellow-800 mb-3">개선점 (Future Work)</h3>
-                    <ul class="list-disc list-inside space-y-2 text-yellow-700">
-                        <li><strong class="text-red-600">(보안)</strong> API 키가 클라이언트에 노출됨. 중간 API 서버(Node.js 등) 구축 필요</li>
-                        <li>(기능) AI 요약본을 의사가 수정/보완할 수 있는 '리포트 편집' 기능 추가</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- 푸터 -->
-    <footer class="bg-gray-800 text-gray-300 mt-12">
-        <div class="container mx-auto px-6 py-8 text-center">
-            <p class="mb-2">&copy; 2024 Seo Yejin. All rights reserved.</p>
-            <p class="text-sm">Created for the "Smart Chart" Project Portfolio.</p>
-            <div class="flex justify-center space-x-4 mt-4">
-                <a href="mailto:syejin2004@naver.com" class="hover:text-white transition-colors">Email</a>
-                <span>&middot;</span>
-                <a href="https://github.com/syejin2004" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">GitHub</a>
-            </div>
-        </div>
-    </footer>
-
+            <!-- 환자용 버튼 -->
+            <a href="patient.html" class="group flex flex-col items-center p-8 bg-white rounded-lg shadow-lg border-2 border-transparent hover:border-pink-500 hover:shadow-xl transition-all duration-300">
+                <svg class="w-16 h-16 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+                <h2 class="text-xl font-semibold text-gray-900 mt-5">환자</h2>
+                <p class="text-sm text-gray-500 mt-1 group-hover:text-pink-600 transition">사전 문진표 작성하기</p>
+            </a>
+        </main>
+    </div>
 </body>
 </html>
